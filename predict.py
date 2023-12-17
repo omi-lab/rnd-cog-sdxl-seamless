@@ -9,6 +9,14 @@ from weights import WeightsDownloadCache
 
 import numpy as np
 import torch
+def patch_conv(**patch):
+    cls = torch.nn.Conv2d
+    init = cls.__init__
+    def __init__(self, *args, **kwargs):
+        return init(self, *args, **kwargs, **patch)
+    cls.__init__ = __init__
+
+patch_conv(padding_mode='circular')
 from cog import BasePredictor, Input, Path
 from diffusers import (
     DDIMScheduler,
