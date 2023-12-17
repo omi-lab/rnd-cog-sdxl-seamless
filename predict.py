@@ -27,7 +27,7 @@ from diffusers import (
     HeunDiscreteScheduler,
     PNDMScheduler,
     StableDiffusionXLImg2ImgPipeline,
-    StableDiffusionXLInpaintPipeline,
+    #StableDiffusionXLInpaintPipeline, not available in diffusers 0.18.0
 )
 from diffusers.models.attention_processor import LoRAAttnProcessor2_0
 from diffusers.pipelines.stable_diffusion.safety_checker import (
@@ -210,17 +210,17 @@ class Predictor(BasePredictor):
         )
         self.img2img_pipe.to("cuda")
 
-        print("Loading SDXL inpaint pipeline...")
-        self.inpaint_pipe = StableDiffusionXLInpaintPipeline(
-            vae=self.txt2img_pipe.vae,
-            text_encoder=self.txt2img_pipe.text_encoder,
-            text_encoder_2=self.txt2img_pipe.text_encoder_2,
-            tokenizer=self.txt2img_pipe.tokenizer,
-            tokenizer_2=self.txt2img_pipe.tokenizer_2,
-            unet=self.txt2img_pipe.unet,
-            scheduler=self.txt2img_pipe.scheduler,
-        )
-        self.inpaint_pipe.to("cuda")
+        # print("Loading SDXL inpaint pipeline...") # not compatible with diffuers 0.18.0
+        # self.inpaint_pipe = StableDiffusionXLInpaintPipeline(
+        #     vae=self.txt2img_pipe.vae,
+        #     text_encoder=self.txt2img_pipe.text_encoder,
+        #     text_encoder_2=self.txt2img_pipe.text_encoder_2,
+        #     tokenizer=self.txt2img_pipe.tokenizer,
+        #     tokenizer_2=self.txt2img_pipe.tokenizer_2,
+        #     unet=self.txt2img_pipe.unet,
+        #     scheduler=self.txt2img_pipe.scheduler,
+        # )
+        # self.inpaint_pipe.to("cuda")
 
         print("Loading SDXL refiner pipeline...")
         # FIXME(ja): should the vae/text_encoder_2 be loaded from SDXL always?
@@ -264,7 +264,7 @@ class Predictor(BasePredictor):
         self,
         prompt: str = Input(
             description="Input prompt",
-            default="An astronaut riding a rainbow unicorn",
+            default="flat polished purple marble surface texture",
         ),
         negative_prompt: str = Input(
             description="Input Negative Prompt",
@@ -295,7 +295,7 @@ class Predictor(BasePredictor):
         scheduler: str = Input(
             description="scheduler",
             choices=SCHEDULERS.keys(),
-            default="K_EULER",
+            default="KarrasDPM",
         ),
         num_inference_steps: int = Input(
             description="Number of denoising steps", ge=1, le=500, default=50
