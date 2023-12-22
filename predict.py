@@ -389,11 +389,13 @@ class Predictor(BasePredictor):
         elif refine == "base_image_refiner":
             sdxl_kwargs["output_type"] = "latent"
 
-        if not apply_watermark:
-            # toggles watermark for this prediction
-            watermark_cache = pipe.watermark
-            pipe.watermark = None
-            self.refiner.watermark = None
+        # Patch watermarking
+        class NoWatermark:
+            def apply_watermark(self, img):
+                return img
+            
+        pipe.watermar = NoWatermark()
+        self.refiner.watermark = NoWatermark()
 
         pipe.scheduler = SCHEDULERS[scheduler].from_config(pipe.scheduler.config)
         generator = torch.Generator("cuda").manual_seed(seed)
@@ -422,10 +424,6 @@ class Predictor(BasePredictor):
                 common_args["num_inference_steps"] = refine_steps
 
             output = self.refiner(**common_args, **refiner_kwargs)
-
-        if not apply_watermark:
-            pipe.watermark = watermark_cache
-            self.refiner.watermark = watermark_cache
 
         if not disable_safety_checker:
             _, has_nsfw_content = self.run_safety_checker(output.images)
