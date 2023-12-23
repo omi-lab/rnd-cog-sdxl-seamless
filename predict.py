@@ -414,22 +414,10 @@ class Predictor(BasePredictor):
 
             output = self.refiner(**common_args, **refiner_kwargs)
 
-        if not disable_safety_checker:
-            _, has_nsfw_content = self.run_safety_checker(output.images)
-
         output_paths = []
         for i, image in enumerate(output.images):
-            if not disable_safety_checker:
-                if has_nsfw_content[i]:
-                    print(f"NSFW content detected in image {i}")
-                    continue
             output_path = f"/tmp/out-{i}.png"
             image.save(output_path)
             output_paths.append(Path(output_path))
-
-        if len(output_paths) == 0:
-            raise Exception(
-                f"NSFW content detected. Try running it again, or try a different prompt."
-            )
 
         return output_paths
