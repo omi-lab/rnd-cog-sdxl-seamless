@@ -372,7 +372,7 @@ class Predictor(BasePredictor):
             def apply_watermark(self, img):
                 return img
             
-        pipe.watermar = NoWatermark()
+        pipe.watermark = NoWatermark()
         self.refiner.watermark = NoWatermark()
 
         pipe.scheduler = SCHEDULERS[scheduler].from_config(pipe.scheduler.config)
